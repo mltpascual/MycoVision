@@ -1,0 +1,7 @@
+{
+  "name": "MycoVision - Magic Mushroom Visualization",
+  "description": "An immersive, AI-powered visualization tool for exploring the mystical and scientific world of psilocybin mushrooms through generative art and interactive data.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
