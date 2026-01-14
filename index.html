@@ -11,36 +11,25 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #050505;
+            background-color: #000000;
             color: #ffffff;
             margin: 0;
             overflow-x: hidden;
         }
 
         h1, h2, h3, .font-heading {
-            font-family: 'Space+Grotesk', sans-serif;
-        }
-
-        .psychedelic-gradient {
-            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
-            background-size: 400% 400%;
-            animation: gradient-shift 15s ease infinite;
-        }
-
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .glow-hover:hover {
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Prevent scrollbars during visualization */
+        body.ov-hidden {
+          overflow: hidden;
         }
     </style>
 <script type="importmap">
@@ -56,5 +45,6 @@
 </head>
 <body>
     <div id="root"></div>
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
