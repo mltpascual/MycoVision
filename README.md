@@ -1,20 +1,22 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# MycoVision | Magic Mushroom Visualization
 
-# Run and deploy your AI Studio app
+An immersive, calming visualization tool designed to explore the intersection of organic art and digital fractals. MycoVision uses a custom-built Kaleidoscope engine to transform high-resolution psychedelic imagery into a hypnotic, zen-like experience.
 
-This contains everything you need to run your app locally.
+## ✨ Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1OJIZFs-qpZMIcY1A_FfxxMDlp7-nxxB3
+- **Hypnotic Kaleidoscope Engine**: Real-time canvas-based rendering with multi-layer parallax and variable segment density.
+- **Curated Psychedelic Art**: A library of 10+ high-definition images featuring ethereal character silhouettes and cosmic fractals.
+- **Sonic Sanctuaries**: Integration of deep, calming ambient soundscapes designed for relaxation and focus.
+- **Responsive Design**: Fully optimized for desktop and mobile, with high-DPI support for crisp visuals.
+- **User-Centric Controls**: Adjustable complexity (segments), audio toggles, and "Evolution" buttons for infinite variety.
 
-## Run Locally
+## 🚀 Quick Start
 
-**Prerequisites:**  Node.js
+1. Open `index.html` in any modern web browser.
+2. Click **Initialize** to enter the immersive mode.
+3. Use the **Complexity Bar** (bottom) to change the fractal density.
+4. Press **Evolve** to cycle through the curated art library.
 
+## 🎨 Design Philosophy
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Unlike traditional "trippy" visualizations that can be overstimulating, MycoVision focuses on **calmness**. It uses slow zoom speeds, soft transitions, and deep ambient pads to create a meditative digital environment.
