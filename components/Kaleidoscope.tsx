@@ -13,19 +13,20 @@ export const Kaleidoscope: React.FC<KaleidoscopeProps> = ({ imageSrc, onClose, o
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [segments, setSegments] = useState(12);
   const [isMuted, setIsMuted] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const requestRef = useRef<number>(0);
   const startTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    // Audio Setup: Immersive psychedelic ambient drone
-    const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
+    // High-quality, stable, calming ambient soundscape (Piano & Pads)
+    const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'); 
     audio.loop = true;
-    audio.volume = 0.4;
-    audio.play().catch(e => console.log("Audio autoplay blocked, requires interaction"));
+    audio.volume = 0.3;
     audioRef.current = audio;
 
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.src = imageSrc;
     img.onload = () => {
       imgRef.current = img;
@@ -33,7 +34,6 @@ export const Kaleidoscope: React.FC<KaleidoscopeProps> = ({ imageSrc, onClose, o
 
     const handleResize = () => {
       if (canvasRef.current) {
-        // High DPI Support
         const dpr = window.devicePixelRatio || 1;
         canvasRef.current.width = window.innerWidth * dpr;
         canvasRef.current.height = window.innerHeight * dpr;
@@ -44,12 +44,24 @@ export const Kaleidoscope: React.FC<KaleidoscopeProps> = ({ imageSrc, onClose, o
 
     window.addEventListener('resize', handleResize);
     handleResize();
+    
     return () => {
       window.removeEventListener('resize', handleResize);
-      audio.pause();
-      audio.src = '';
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
     };
   }, [imageSrc]);
+
+  const handleStart = () => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(err => {
+        console.error("Audio playback error:", err);
+      });
+    }
+    setHasInteracted(true);
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -73,29 +85,28 @@ export const Kaleidoscope: React.FC<KaleidoscopeProps> = ({ imageSrc, onClose, o
         const radius = Math.sqrt(width * width + height * height);
         const step = (Math.PI * 2) / segments;
 
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = '#010101';
         ctx.fillRect(0, 0, width, height);
         
-        // FIX BLUR: High quality rendering settings
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        const numLayers = 12; // More layers for smoother depth
-        const zoomSpeed = 0.15; // Slower for more "trip" feel
+        const numLayers = 10;
+        const zoomSpeed = 0.03; // Very slow and hypnotic
         const globalZoom = (time * zoomSpeed) % 1;
 
         for (let l = 0; l < numLayers; l++) {
           const layerProgress = (l - globalZoom) / numLayers;
-          const scale = Math.pow(2.2, (1 - layerProgress) * 5);
+          const scale = Math.pow(3.8, (1 - layerProgress) * 4);
           
           let opacity = Math.sin(layerProgress * Math.PI);
-          opacity = Math.max(0, opacity);
+          opacity = Math.pow(Math.max(0, opacity), 2);
 
           ctx.save();
           ctx.translate(centerX, centerY);
-          ctx.globalAlpha = opacity;
+          ctx.globalAlpha = opacity * 0.8;
           
-          ctx.rotate(time * 0.03 + (l * 0.08));
+          ctx.rotate(time * 0.006 + (l * 0.08) + Math.sin(time * 0.1) * 0.04);
           ctx.scale(scale, scale);
 
           for (let i = 0; i < segments; i++) {
@@ -111,49 +122,28 @@ export const Kaleidoscope: React.FC<KaleidoscopeProps> = ({ imageSrc, onClose, o
 
             if (i % 2 === 1) ctx.scale(1, -1);
 
-            // Tiling Logic to prevent blurriness
-            // Instead of stretching one image, we draw it at its natural high-detail size
-            const textureScale = 0.5 / dpr; // Scale factor for the texture density
-            const driftX = Math.sin(time * 0.1) * 200;
-            const driftY = (time * 150) % img.height;
+            const textureScale = 0.75 / dpr; 
+            const driftX = Math.sin(time * 0.02) * 150;
+            const driftY = (time * 25) % img.height;
 
-            // Draw multiple tiles to ensure no gaps during high-speed travel
-            const drawW = img.width * textureScale;
-            const drawH = img.height * textureScale;
-
-            for (let x = 0; x < 2; x++) {
-              for (let y = -1; y < 2; y++) {
-                ctx.drawImage(
-                  img,
-                  (x * drawW) - (drawW / 2) + (driftX * textureScale),
-                  (y * drawH) - (drawH / 2) + (driftY * textureScale),
-                  drawW,
-                  drawH
-                );
-              }
-            }
-
+            ctx.drawImage(
+              img,
+              -(img.width * textureScale / 2) + (driftX * textureScale),
+              -(img.height * textureScale / 2) + (driftY * textureScale),
+              img.width * textureScale,
+              img.height * textureScale
+            );
             ctx.restore();
           }
           ctx.restore();
         }
 
-        // Deep vignette for focus
         const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
         grad.addColorStop(0, 'rgba(0,0,0,0)');
-        grad.addColorStop(0.5, 'rgba(0,0,0,0.1)');
-        grad.addColorStop(1, 'rgba(0,0,0,0.95)');
+        grad.addColorStop(0.85, 'rgba(0,0,0,0.6)');
+        grad.addColorStop(1, 'rgba(0,0,0,1)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
-
-        // Chromatic aberration-ish effect (simple overlay)
-        ctx.globalCompositeOperation = 'screen';
-        const pulse = Math.sin(time) * 5;
-        ctx.fillStyle = 'rgba(255, 0, 100, 0.02)';
-        ctx.fillRect(pulse, 0, width, height);
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.02)';
-        ctx.fillRect(-pulse, 0, width, height);
-        ctx.globalCompositeOperation = 'source-over';
       }
       requestRef.current = requestAnimationFrame(render);
     };
@@ -164,55 +154,59 @@ export const Kaleidoscope: React.FC<KaleidoscopeProps> = ({ imageSrc, onClose, o
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
-      <canvas ref={canvasRef} className="cursor-none" />
-      
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-transparent to-black/80"></div>
+      {!hasInteracted && (
+        <div className="absolute inset-0 z-[150] bg-black/98 backdrop-blur-3xl flex flex-col items-center justify-center text-center p-6 transition-all duration-1000">
+          <button 
+            onClick={handleStart}
+            className="group relative flex flex-col items-center"
+          >
+            <div className="w-32 h-32 rounded-full border border-pink-500/20 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:border-pink-500/40 transition-all duration-1000 shadow-[0_0_60px_rgba(236,72,153,0.05)]">
+              <span className="text-5xl group-hover:animate-pulse">🍄</span>
+            </div>
+            <h2 className="text-white font-heading text-xl tracking-[1em] uppercase mb-4 opacity-50">Enter</h2>
+            <p className="text-pink-500/30 text-[9px] uppercase tracking-widest font-black">Tap to start calming audio</p>
+          </button>
+        </div>
+      )}
 
-      {/* Top Controls */}
+      <canvas ref={canvasRef} />
+      
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/20 via-transparent to-black/80"></div>
+
       <div className="absolute top-8 left-8 right-8 z-[110] flex justify-between items-start">
         <div className="flex gap-4">
           <button 
             onClick={onRegenerate}
             disabled={isGenerating}
-            className={`px-8 py-3 rounded-full glass border border-white/20 text-white font-bold uppercase tracking-[0.3em] text-[11px] transition-all flex items-center gap-3 ${isGenerating ? 'opacity-50' : 'hover:bg-white hover:text-black hover:scale-105 shadow-[0_0_25px_rgba(255,255,255,0.2)]'}`}
+            className={`px-8 py-3 rounded-full glass border border-white/10 text-white/50 font-bold uppercase tracking-[0.3em] text-[9px] transition-all flex items-center gap-3 ${isGenerating ? 'opacity-50' : 'hover:bg-white/10 hover:text-white'}`}
           >
-            {isGenerating ? (
-              <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            ) : '✧'} Shift Reality
+            {isGenerating ? 'Calming...' : '✧ Change Mood'}
           </button>
 
           <button 
             onClick={() => setIsMuted(!isMuted)}
-            className="w-12 h-12 rounded-full glass border border-white/20 text-white flex items-center justify-center hover:bg-white/10 transition-all"
+            className="w-10 h-10 rounded-full glass border border-white/10 text-white/30 flex items-center justify-center hover:text-white transition-all text-sm"
           >
             {isMuted ? '🔇' : '🔊'}
           </button>
         </div>
         
-        <button 
-          onClick={onClose}
-          className="px-6 py-3 rounded-full glass border border-white/20 text-white/40 font-bold uppercase tracking-widest text-[10px] hover:text-white hover:border-white transition-all"
-        >
-          Exit Tunnel
-        </button>
+        <div className="hidden sm:block text-[9px] text-white/10 uppercase tracking-[0.6em] font-black">
+          Zen Audio Engine Active
+        </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="absolute bottom-12 left-0 right-0 z-[110] flex flex-col items-center gap-8">
-        <div className="flex gap-4 p-2 glass rounded-full border border-white/10 backdrop-blur-3xl">
+      <div className="absolute bottom-12 left-0 right-0 z-[110] flex flex-col items-center gap-6">
+        <div className="flex gap-4 p-2 glass rounded-full border border-white/5 backdrop-blur-2xl">
           {[6, 12, 18, 24, 32].map(n => (
             <button 
               key={n}
               onClick={() => setSegments(n)}
-              className={`w-12 h-12 rounded-full flex items-center justify-center text-[11px] font-black transition-all ${segments === n ? 'bg-white text-black scale-110 shadow-[0_0_30px_rgba(255,255,255,0.5)]' : 'text-white/30 hover:text-white'}`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center text-[9px] font-black transition-all ${segments === n ? 'bg-white/60 text-black' : 'text-white/20 hover:text-white/50'}`}
             >
               {n}
             </button>
           ))}
-        </div>
-        <div className="text-center space-y-2">
-          <p className="text-white/20 text-[9px] uppercase tracking-[1em] font-black">Harmonic Symmetry</p>
-          <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent mx-auto"></div>
         </div>
       </div>
     </div>
